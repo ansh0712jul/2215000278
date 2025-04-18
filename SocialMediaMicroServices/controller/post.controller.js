@@ -63,3 +63,90 @@
   }
 };
 
+
+
+const post1 = async (req, res) => {
+  try {
+    const { userid } = req.params;
+    const response = await axios.get(`http://20.244.56.144/evaluation-service/users/${userid}/posts`,{
+      headers: {
+          'Content-Type': 'application/json',
+          Authorization: "Beara eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiZXhwIjoxNzQ0OTU0MzQ4LCJpYXQiOjE3NDQ5NTQwNDgsImlzcyI6IkFmZm9yZG1lZCIsImp0aSI6IjQ5MzQ3YmFhLTcwMDktNDIyZS1hY2VlLWI3YmZmZDZhMjhmOSIsInN1YiI6Im1hZGhhdi5iYW5zYWxfY3MyMkBnbGEuYWMuaW4ifSwiZW1haWwiOiJtYWRoYXYuYmFuc2FsX2NzMjJAZ2xhLmFjLmluIiwibmFtZSI6Im1hZGhhdiBiYW5zYWwiLCJyb2xsTm8iOiIyMjE1MDAxMDEyIiwiYWNjZXNzQ29kZSI6IkNObmVHVCIsImNsaWVudElEIjoiNDkzNDdiYWEtNzAwOS00MjJlLWFjZWUtYjdiZmZkNmEyOGY5IiwiY2xpZW50U2VjcmV0IjoiRFZNc0t6eVphUGVKWnN1SyJ9.Eaj8YWRFewYYXvDUXRDNimSQzrFyFWIHbAg-9Jgj1aY"
+  }});
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching posts' });
+  }
+};
+
+// Get Top 5 Users with Most Commented Posts
+const top5 = async (req, res) => {
+  try {
+
+    const usersRes = await axios.get('http://20.244.56.144/evaluation-service/users' ,{
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: "Beara eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiZXhwIjoxNzQ0OTU0MzQ4LCJpYXQiOjE3NDQ5NTQwNDgsImlzcyI6IkFmZm9yZG1lZCIsImp0aSI6IjQ5MzQ3YmFhLTcwMDktNDIyZS1hY2VlLWI3YmZmZDZhMjhmOSIsInN1YiI6Im1hZGhhdi5iYW5zYWxfY3MyMkBnbGEuYWMuaW4ifSwiZW1haWwiOiJtYWRoYXYuYmFuc2FsX2NzMjJAZ2xhLmFjLmluIiwibmFtZSI6Im1hZGhhdiBiYW5zYWwiLCJyb2xsTm8iOiIyMjE1MDAxMDEyIiwiYWNjZXNzQ29kZSI6IkNObmVHVCIsImNsaWVudElEIjoiNDkzNDdiYWEtNzAwOS00MjJlLWFjZWUtYjdiZmZkNmEyOGY5IiwiY2xpZW50U2VjcmV0IjoiRFZNc0t6eVphUGVKWnN1SyJ9.Eaj8YWRFewYYXvDUXRDNimSQzrFyFWIHbAg-9Jgj1aY"
+    }});
+    const users = usersRes.data.users;
+    console.log(users);
+
+    const userCommentCounts = [];
+    await Promise.all(
+      Object.entries(users).map(async ([userId, userName]) => {
+        try {
+          const postsRes = await axios.get(`http://20.244.56.144/evaluation-service/users/${userId}/posts`,{
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: "Beara eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiZXhwIjoxNzQ0OTU0MzQ4LCJpYXQiOjE3NDQ5NTQwNDgsImlzcyI6IkFmZm9yZG1lZCIsImp0aSI6IjQ5MzQ3YmFhLTcwMDktNDIyZS1hY2VlLWI3YmZmZDZhMjhmOSIsInN1YiI6Im1hZGhhdi5iYW5zYWxfY3MyMkBnbGEuYWMuaW4ifSwiZW1haWwiOiJtYWRoYXYuYmFuc2FsX2NzMjJAZ2xhLmFjLmluIiwibmFtZSI6Im1hZGhhdiBiYW5zYWwiLCJyb2xsTm8iOiIyMjE1MDAxMDEyIiwiYWNjZXNzQ29kZSI6IkNObmVHVCIsImNsaWVudElEIjoiNDkzNDdiYWEtNzAwOS00MjJlLWFjZWUtYjdiZmZkNmEyOGY5IiwiY2xpZW50U2VjcmV0IjoiRFZNc0t6eVphUGVKWnN1SyJ9.Eaj8YWRFewYYXvDUXRDNimSQzrFyFWIHbAg-9Jgj1aY"
+        }});
+          const posts = postsRes.data.posts || [];
+
+          let totalComments = 0;
+
+          await Promise.all(
+            posts.map(async (post) => {
+              try {
+                const commentsRes = await axios.get(`http://20.244.56.144/evaluation-service/posts/${post.id}/comments`,{
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: "Beara eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiZXhwIjoxNzQ0OTU0MzQ4LCJpYXQiOjE3NDQ5NTQwNDgsImlzcyI6IkFmZm9yZG1lZCIsImp0aSI6IjQ5MzQ3YmFhLTcwMDktNDIyZS1hY2VlLWI3YmZmZDZhMjhmOSIsInN1YiI6Im1hZGhhdi5iYW5zYWxfY3MyMkBnbGEuYWMuaW4ifSwiZW1haWwiOiJtYWRoYXYuYmFuc2FsX2NzMjJAZ2xhLmFjLmluIiwibmFtZSI6Im1hZGhhdiBiYW5zYWwiLCJyb2xsTm8iOiIyMjE1MDAxMDEyIiwiYWNjZXNzQ29kZSI6IkNObmVHVCIsImNsaWVudElEIjoiNDkzNDdiYWEtNzAwOS00MjJlLWFjZWUtYjdiZmZkNmEyOGY5IiwiY2xpZW50U2VjcmV0IjoiRFZNc0t6eVphUGVKWnN1SyJ9.Eaj8YWRFewYYXvDUXRDNimSQzrFyFWIHbAg-9Jgj1aY"
+                }});
+                totalComments += commentsRes.data.length;
+              } catch (err) {
+                console.error(`Error fetching comments for post ID: ${post.id}`);
+              }
+            })
+          );
+
+          userCommentCounts.push({
+            userId,
+            userName,
+            totalComments
+          });
+        } catch (err) {
+          console.error(`Error fetching posts for user ID: ${userId}`);
+        }
+      })
+    );
+
+    
+    const topUsers = userCommentCounts
+      .sort((a, b) => b.totalComments - a.totalComments)
+      .slice(0, 5);
+
+ 
+    res.json({ topUsers });
+    res.json({ users });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: 'Server Error' });
+  }
+}
+
+
+module.exports = {
+  popular,
+  post1,
+  top5
+};
